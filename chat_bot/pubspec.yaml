@@ -22,6 +22,7 @@ dependencies:
   path_provider: ^2.1.4
   hive: ^2.2.3
   hive_flutter: ^1.1.0
+  flutter_dotenv: ^5.1.0
 
 dev_dependencies:
   flutter_test:
@@ -35,11 +36,12 @@ flutter:
   uses-material-design: true
   generate: true
   assets:
-    # Add assets from the images directory to the application.
+    - .env
     - assets/images/
 
-flutter_launcher_icons:
+flutter_icons:
   android: true
   ios: true
-  image_path: "assets/icon/matsue_castle_icon.png"
-  remove_alpha_ios: true
+  image_path: "assets/icon/matsue_castle_nobg.png"
+  adaptive_icon_foreground: "assets/icon/matsue_castle_nobg.png"
+  adaptive_icon_background: "#00000000"

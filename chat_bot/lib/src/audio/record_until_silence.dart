@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:record/record.dart';
 
 class RecordUntilSilence {
@@ -36,7 +37,9 @@ class RecordUntilSilence {
     final length = buffer.length < 32 ? buffer.length : 32;
     final bytes = buffer.take(length).toList();
     final hex = bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join(' ');
-    print('First $length bytes: $hex');
+    if (kDebugMode) {
+      print('First $length bytes: $hex');
+    }
   }
 
   Future<File> start(String path) async {
@@ -45,7 +48,9 @@ class RecordUntilSilence {
     }
     if (!await _recorder.hasPermission()) {
       final ok = await _recorder.hasPermission();
-      print('Microphone permission: $ok');
+      if (kDebugMode) {
+        print('Microphone permission: $ok');
+      }
       if (!ok) {
         throw Exception("Microphone permission denied");
       }
@@ -65,29 +70,29 @@ class RecordUntilSilence {
       ),
     );
 
-    print("RecordUntilSilence.start path=$path");
+    //print("RecordUntilSilence.start path=$path");
     _subscription = stream.listen((buffer) async {
       _fileSink?.add(buffer);
-      print("Writing to $_fileSink");
+      //print("Writing to $_fileSink");
       _dataLength += buffer.length;
       _durationMs += _chunkDurationMs(buffer);
-      dumpFirst32(buffer);
+      //dumpFirst32(buffer);
 
       if (_durationMs > 5000) {
-        print("Max duration reached, stopping");
+        //print("Max duration reached, stopping");
         await stop(file);
         onSentenceEnd?.call(file); // notify caller
         return;
       }
 
       if (_isSilent(buffer)) {
-        print(
-            "_isSilent = true _silenceMs=$_silenceMs silenceDurationMs=$silenceDurationMs");
+        //print(
+        //    "_isSilent = true _silenceMs=$_silenceMs silenceDurationMs=$silenceDurationMs");
         _silenceMs += _chunkDurationMs(buffer);
         if (_silenceMs > silenceDurationMs) {
-          print("Calling stop()");
+          //print("Calling stop()");
           await stop(file); // auto stop
-          print("calling onSentenceEnd");
+          //print("calling onSentenceEnd");
           onSentenceEnd?.call(file); // notify caller
         }
       } else {
@@ -99,7 +104,7 @@ class RecordUntilSilence {
   }
 
   Future<void> stop(File file) async {
-    print("stop called");
+    //print("stop called");
     if (!_isRecording) return;
     await _recorder.stop();
     await _subscription?.cancel();
@@ -142,33 +147,12 @@ class RecordUntilSilence {
     final double db = 20.0 * (log(max(ratio, eps)) / _ln10);
 
     // Optional: print to tune threshold
-    print(
-        'dBFS: ${db.toStringAsFixed(1)} silenceThresholdDb:$silenceThresholdDb');
+    //(
+    //    'dBFS: ${db.toStringAsFixed(1)} silenceThresholdDb:$silenceThresholdDb');
 
     return db < silenceThresholdDb; // e.g. -40 dB
   }
 
-  bool _isSilentOld(Uint8List buffer) {
-    // Convert byte buffer → Int16 samples (PCM16 = 2 bytes per sample)
-    final samples = buffer.buffer.asInt16List();
-
-    if (samples.isEmpty) return true;
-
-    // Root Mean Square (RMS)
-    double sumSquares = 0;
-    for (var s in samples) {
-      sumSquares += (s * s);
-    }
-    final rms = sqrt(sumSquares / samples.length);
-
-    // Convert to decibels relative to full scale (dBFS)
-    // 32768 is max amplitude of signed 16-bit PCM
-    double db = 20 * log(rms / 32768.0);
-    print("db: $db silenceThresholdDb:$silenceThresholdDb");
-
-    // Compare to threshold (e.g. -40 dB)
-    return db < silenceThresholdDb;
-  }
 
   void _patchWavHeader(
       File file, int dataLength, int sampleRate, int channels) {

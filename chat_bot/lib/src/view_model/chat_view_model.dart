@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:ai_shop_list/src/audio/record_until_silence.dart';
 import 'package:ai_shop_list/src/model/shop_item.dart';
 import 'package:ai_shop_list/src/repository/chat_repository.dart';
+import 'package:ai_shop_list/src/repository/rag_repository.dart';
 import 'package:ai_shop_list/src/repository/shop_list_repository.dart';
 import 'package:ai_shop_list/src/repository/transcription_repository.dart';
 import 'package:flutter/foundation.dart';
@@ -18,7 +19,7 @@ class ChatViewModel extends ChangeNotifier {
   final OpenAiClient _client;
   late final chatRepo = ChatRepository(_client);
   late final transRepo = TranscriptionRepository(_client);
-  final ShopListRepository _repository;
+  final RagRepository _repository;
   RecordUntilSilence? _recorder;
   bool _isRecording = false;
   File? lastFile;
@@ -31,32 +32,7 @@ class ChatViewModel extends ChangeNotifier {
   final List<ChatMessage> _messages = [];
   List<ChatMessage> get messages => List.unmodifiable(_messages);
 
-  List<ShopItem> _shopList = [];
-  List<ShopItem> get shopList => List.unmodifiable(_shopList);
-
-  ChatViewModel(this._client, this._repository) {
-    _shopList = _repository.getItems();
-    //addShopItem(ShopItem(name: 'Pear', quantity: 1));
-    //addShopItem(ShopItem(name: 'Pineapple', quantity: 1));
-  }
-
-  void setShopListFromJson(List<dynamic> jsonList) {
-    if (kDebugMode) {
-      print("Setting shop list from JSON: $jsonList");
-    }
-    _shopList
-      ..clear()
-      ..addAll(
-          jsonList.map((j) => ShopItem.fromJson(j as Map<String, dynamic>)));
-    _repository.saveAll(_shopList);
-    notifyListeners();
-  }
-
-  void addShopItem(ShopItem item) {
-    _shopList.add(item);
-    _repository.addItem(item);
-    notifyListeners();
-  }
+  ChatViewModel(this._client, this._repository) {}
 
   Future<String?> sendMessage(String text) async {
     _loading = true;
@@ -64,18 +40,11 @@ class ChatViewModel extends ChangeNotifier {
 
     try {
       _messages.add(ChatMessage(role: ChatRole.user, text: text));
-      final existingList = _shopList.map((item) => item.toJson()).toList();
       final json =
-          await chatRepo.sendMessageWithExisitingList(text, existingList);
+          await chatRepo.sendMessage(text);
       final content = json['choices'][0]['message']['content'] as String;
       final inner = jsonDecode(content) as Map<String, dynamic>;
       final reply = inner['message'] as String;
-      final list = inner['list'] as List<dynamic>;
-      setShopListFromJson(list);
-      if (kDebugMode) {
-        print('Reply: $reply');
-        print('List: $list');
-      }
       _messages.add(ChatMessage(role: ChatRole.openai, text: reply));
       _loading = false;
       notifyListeners();
@@ -97,7 +66,7 @@ class ChatViewModel extends ChangeNotifier {
           final reply = await sendMessage(text);
           if (reply != null && reply.isNotEmpty) {
             final tts = FlutterTts();
-            await tts.setLanguage('en-US');
+            await tts.setLanguage('ja-JP');
             await tts.setSpeechRate(0.5);
             await tts.speak(reply);
           }
@@ -141,11 +110,11 @@ class ChatViewModel extends ChangeNotifier {
         lastFile = file;
         _isRecording = false;
         notifyListeners();
-        print("Sentence ended, saved to: ${file.path}");
+        //print("Sentence ended, saved to: ${file.path}");
         // 👉 here you can upload to Whisper or process text
         final text = await runTranscription(file.path);
         if (text != null && text.isNotEmpty) {
-          final reply = await sendMessage(text);
+          final reply = await _repository.ask(text);
           if (reply != null && reply.isNotEmpty) {
             final tts = FlutterTts();
             await tts.setLanguage('en-US');

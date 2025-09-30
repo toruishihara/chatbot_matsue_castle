@@ -2,6 +2,8 @@ import 'package:ai_shop_list/src/network/open_ai_client.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+// https://matsue-castle-qbt5u45.svc.aped-4627-b74a.pinecone.io
+
 class ChatRepository {
   ChatRepository(this.api);
   final OpenAiClient api;
@@ -9,7 +11,8 @@ class ChatRepository {
   final List<Map<String, String>> _history = [];
   List<Map<String, String>> get history => List.unmodifiable(_history);
 
-  Future<Map<String, dynamic>> sendMessageWithExisitingList(String userText, List<Map<String, dynamic>> existingList) async {
+  Future<Map<String, dynamic>> sendMessage(
+      String userText) async {
     final uri = Uri.https(api.base, '/v1/chat/completions');
     final res = await http.post(
       uri,
@@ -20,13 +23,10 @@ class ChatRepository {
       body: jsonEncode({
         'model': 'gpt-4o-mini',
         'messages': [
-          //{'role': 'system', 'content': api.systemPrompt},
           {
             'role': 'user',
             'content': jsonEncode({
-              'instruction': userText,
-              'current_list':
-                  existingList,
+              'instruction': userText
             })
           }
         ],
@@ -36,5 +36,29 @@ class ChatRepository {
       return jsonDecode(res.body) as Map<String, dynamic>;
     }
     throw Exception('OpenAI error: ${res.statusCode} ${res.body}');
+  }
+
+  Future<Map<String, dynamic>> sendMessageToPinecone(
+      String userText, List<double> vector) async {
+    final uri =
+        Uri.parse('https://matsue-castle-qbt5u45.svc.aped-4627-b74a.pinecone.io/query');
+
+    final res = await http.post(
+      uri,
+      headers: {
+        'Api-Key': 'PINECONE_API_KEY',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        "vector": vector,
+        "topK": 3,
+        "includeMetadata": true,
+      }),
+    );
+
+    if (res.statusCode >= 200 && res.statusCode < 300) {
+      return jsonDecode(res.body) as Map<String, dynamic>;
+    }
+    throw Exception('Pinecone error: ${res.statusCode} ${res.body}');
   }
 }
