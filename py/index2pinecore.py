@@ -1,5 +1,7 @@
 # index_to_pinecone.py
 import os, glob
+import re
+from xml.dom.minidom import Document
 from dotenv import load_dotenv
 
 from langchain_community.document_loaders import TextLoader, PyPDFLoader, WikipediaLoader, WebBaseLoader, CSVLoader
@@ -10,9 +12,30 @@ from langchain_pinecone import PineconeVectorStore
 from pinecone import Pinecone, ServerlessSpec
 from langchain_community.document_loaders import UnstructuredURLLoader
 
-#with open("data/nickname.txt", "rb") as f:
-#    raw = f.read(400)
-#print(raw[:300])
+def strip_furigana(text: str) -> str:
+    # 例: 「大 おお 海 み 崎 さき 石」 → 「大海崎石」
+    # 1) 「漢字 空白 かな」の繰り返しを落とす
+    pat1 = re.compile(r'([一-龠々〆ヶ])\s*[ぁ-んァ-ンー]+\s*')
+    text = pat1.sub(r'\1', text)
+
+    # 2) 括弧付きルビ「漢字（かな）」や「漢字(かな)」を落とす
+    pat2 = re.compile(r'([一-龠々〆ヶ]+)[（(][ぁ-んァ-ンー]+[)）]')
+    text = pat2.sub(r'\1', text)
+
+    # 3) 連続スペース縮約
+    text = re.sub(r'[ \t]+', ' ', text)
+    return text
+
+def load_pdf_strip_ruby(path: str):
+    loader = PyPDFLoader(path)
+    docs = loader.load()
+    cleaned = []
+    for d in docs:
+        text = strip_furigana(d.page_content)  # 1) の関数
+        print("Original:", d.page_content[:100])
+        print("Cleaned:", text[:100])
+        cleaned.append(Document(page_content=text, metadata=d.metadata))
+    return cleaned
 
 load_dotenv()
 OPENAI_API_KEY   = os.getenv("OPENAI_API_KEY")
@@ -33,8 +56,7 @@ for p in paths:
     print(f"Loading: {p}")
     if p.lower().endswith(".pdf"):
         # PyPDFLoader returns one Document per page (metadata has page number)
-        loader = PyPDFLoader(p)
-        docs.extend(loader.load())
+        docs.extend(load_pdf_strip_ruby(p))
     elif p.lower().endswith(".csv"):
         loader = CSVLoader(p, encoding="utf-8")
         docs.extend(loader.load())

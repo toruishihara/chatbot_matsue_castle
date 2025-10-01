@@ -1,5 +1,4 @@
 import 'package:ai_shop_list/src/repository/rag_repository.dart';
-import 'package:ai_shop_list/src/repository/shop_list_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
@@ -19,8 +18,6 @@ void main() async {
   final settingsController = SettingsController(SettingsService());
   await settingsController.loadSettings();
 
-  final box = await Hive.openBox('shoplistBox');
-  final shopRepo = ShopListRepository(box);
   final ragRepo = RagRepository();
 
   runApp(

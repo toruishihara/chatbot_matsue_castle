@@ -11,6 +11,7 @@ class TranscriptionRepository {
   final OpenAiClient api;
 
   Future<String?> transcribe(String path) async {
+    print("transccribe called with path: $path"); // twice
     try {
       final file = File(path); // e.g. /storage/emulated/0/…/sample.wav
       final text = await transcribeWav(
@@ -19,7 +20,7 @@ class TranscriptionRepository {
       );
       // use `text` (update state, notify listeners, etc.)
       if (kDebugMode) {
-        print(' $text');
+        print('TranscriptionRepository:transcribe $text'); // twice
       }
       return text;
     } catch (e, st) {
@@ -32,6 +33,7 @@ class TranscriptionRepository {
   }
 
   Future<String> transcribeWav(File wavFile, {String? language}) async {
+    print("transcribeWav called with file: ${wavFile.path}, language: $language");
     final uri = Uri.https(api.base, '/v1/audio/transcriptions');
     final req = http.MultipartRequest('POST', uri)
       ..headers['Authorization'] = 'Bearer ${OpenAiClient.apiKey}'

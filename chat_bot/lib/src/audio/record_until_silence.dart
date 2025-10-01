@@ -29,7 +29,7 @@ class RecordUntilSilence {
     this.sampleRate = 16000,
     this.numChannels = 1,
     this.silenceThresholdDb = -10,
-    this.silenceDurationMs = 2000,
+    this.silenceDurationMs = 1000,
     this.onSentenceEnd,
   });
 
@@ -78,19 +78,18 @@ class RecordUntilSilence {
       _durationMs += _chunkDurationMs(buffer);
       //dumpFirst32(buffer);
 
-      if (_durationMs > 5000) {
-        //print("Max duration reached, stopping");
+      if (_durationMs == 5000 && _isRecording == true) {
+        print("Max duration reached, stopping");
         await stop(file);
         onSentenceEnd?.call(file); // notify caller
         return;
       }
 
       if (_isSilent(buffer)) {
-        //print(
-        //    "_isSilent = true _silenceMs=$_silenceMs silenceDurationMs=$silenceDurationMs");
+        print("Detected silence in chunk");
         _silenceMs += _chunkDurationMs(buffer);
         if (_silenceMs > silenceDurationMs) {
-          //print("Calling stop()");
+          print("Calling stop() _silenceMs=$_silenceMs");
           await stop(file); // auto stop
           //print("calling onSentenceEnd");
           onSentenceEnd?.call(file); // notify caller
@@ -104,7 +103,7 @@ class RecordUntilSilence {
   }
 
   Future<void> stop(File file) async {
-    //print("stop called");
+    print("stop called");
     if (!_isRecording) return;
     await _recorder.stop();
     await _subscription?.cancel();
@@ -113,6 +112,7 @@ class RecordUntilSilence {
 
     _patchWavHeader(file, _dataLength, sampleRate, numChannels);
     _isRecording = false;
+    print("_isRecording = false");
   }
 
   Uint8List _makeWavHeaderPlaceholder() {

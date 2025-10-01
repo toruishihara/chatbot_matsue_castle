@@ -2,10 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:ai_shop_list/src/audio/record_until_silence.dart';
-import 'package:ai_shop_list/src/model/shop_item.dart';
 import 'package:ai_shop_list/src/repository/chat_repository.dart';
 import 'package:ai_shop_list/src/repository/rag_repository.dart';
-import 'package:ai_shop_list/src/repository/shop_list_repository.dart';
 import 'package:ai_shop_list/src/repository/transcription_repository.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -39,13 +37,17 @@ class ChatViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
+      print("added message0: $text");
       _messages.add(ChatMessage(role: ChatRole.user, text: text));
+      notifyListeners();
       final json =
           await chatRepo.sendMessage(text);
       final content = json['choices'][0]['message']['content'] as String;
       final inner = jsonDecode(content) as Map<String, dynamic>;
       final reply = inner['message'] as String;
+      print("added message0: $reply");
       _messages.add(ChatMessage(role: ChatRole.openai, text: reply));
+      notifyListeners();
       _loading = false;
       notifyListeners();
       return reply;
@@ -54,40 +56,6 @@ class ChatViewModel extends ChangeNotifier {
       _loading = false;
       notifyListeners();
       return null;
-    }
-  }
-
-  Future<void> handleMicButton5Sec() async {
-    try {
-      final file = await recordToWav();
-      if (file != null) {
-        final text = await runTranscription(file.path);
-        if (text != null && text.isNotEmpty) {
-          final reply = await sendMessage(text);
-          if (reply != null && reply.isNotEmpty) {
-            final tts = FlutterTts();
-            await tts.setLanguage('ja-JP');
-            await tts.setSpeechRate(0.5);
-            await tts.speak(reply);
-          }
-        } else {
-          if (kDebugMode) {
-            print("Transcription returned empty text");
-          }
-        }
-      } else {
-        if (kDebugMode) {
-          print("Recording failed, file is null");
-        }
-      }
-    } catch (e, st) {
-      // handle any exceptions from either function
-      if (kDebugMode) {
-        print("Error in recordAndTranscribe: $e");
-      }
-      if (kDebugMode) {
-        print(st);
-      }
     }
   }
 
@@ -103,6 +71,7 @@ class ChatViewModel extends ChangeNotifier {
   }
 
   Future<void> startRecording() async {
+    print("startRecording");
     _recorder = RecordUntilSilence(
       silenceThresholdDb: -10,
       silenceDurationMs: 1000,
@@ -110,12 +79,18 @@ class ChatViewModel extends ChangeNotifier {
         lastFile = file;
         _isRecording = false;
         notifyListeners();
-        //print("Sentence ended, saved to: ${file.path}");
+        print("Sentence ended, saved to: ${file.path}"); // twice
         // 👉 here you can upload to Whisper or process text
         final text = await runTranscription(file.path);
+        print("runTranscription return: $text");
         if (text != null && text.isNotEmpty) {
+          _messages.add(ChatMessage(role: ChatRole.user, text: text));
+          notifyListeners();
           final reply = await _repository.ask(text);
-          if (reply != null && reply.isNotEmpty) {
+          if (reply.isNotEmpty) {
+            print("startRecording added message: $reply");
+            _messages.add(ChatMessage(role: ChatRole.openai, text: reply));
+            notifyListeners();
             final tts = FlutterTts();
             await tts.setLanguage('en-US');
             await tts.setSpeechRate(0.5);
@@ -181,6 +156,7 @@ class ChatViewModel extends ChangeNotifier {
   }
 
   Future<String?> runTranscription(String path) async {
+    print("runTranscription with path: $path");
     return await transRepo.transcribe(path);
   }
 
