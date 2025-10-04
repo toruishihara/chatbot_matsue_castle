@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:ai_shop_list/src/audio/record_until_silence.dart';
-import 'package:ai_shop_list/src/repository/chat_repository.dart';
-import 'package:ai_shop_list/src/repository/rag_repository.dart';
-import 'package:ai_shop_list/src/repository/transcription_repository.dart';
+import 'package:matsue_castle_chat_bot/src/audio/record_until_silence.dart';
+import 'package:matsue_castle_chat_bot/src/network/app_logger.dart';
+import 'package:matsue_castle_chat_bot/src/repository/chat_repository.dart';
+import 'package:matsue_castle_chat_bot/src/repository/rag_repository.dart';
+import 'package:matsue_castle_chat_bot/src/repository/transcription_repository.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-// ignore: depend_on_referenced_packages
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 import '../model/chat_message.dart';
@@ -30,22 +30,25 @@ class ChatViewModel extends ChangeNotifier {
   final List<ChatMessage> _messages = [];
   List<ChatMessage> get messages => List.unmodifiable(_messages);
 
-  ChatViewModel(this._client, this._repository) {}
+  ChatViewModel(this._client, this._repository);
 
   Future<String?> sendMessage(String text) async {
     _loading = true;
     notifyListeners();
 
     try {
-      print("added message0: $text");
+      if (kDebugMode) {
+        print("added message0: $text");
+      }
       _messages.add(ChatMessage(role: ChatRole.user, text: text));
       notifyListeners();
-      final json =
-          await chatRepo.sendMessage(text);
+      final json = await chatRepo.sendMessage(text);
       final content = json['choices'][0]['message']['content'] as String;
       final inner = jsonDecode(content) as Map<String, dynamic>;
       final reply = inner['message'] as String;
-      print("added message0: $reply");
+      if (kDebugMode) {
+        print("added message0: $reply");
+      }
       _messages.add(ChatMessage(role: ChatRole.openai, text: reply));
       notifyListeners();
       _loading = false;
@@ -71,7 +74,9 @@ class ChatViewModel extends ChangeNotifier {
   }
 
   Future<void> startRecording() async {
-    print("startRecording");
+    if (kDebugMode) {
+      print("startRecording");
+    }
     _recorder = RecordUntilSilence(
       silenceThresholdDb: -10,
       silenceDurationMs: 1000,
@@ -79,16 +84,20 @@ class ChatViewModel extends ChangeNotifier {
         lastFile = file;
         _isRecording = false;
         notifyListeners();
-        print("Sentence ended, saved to: ${file.path}"); // twice
+        if (kDebugMode) {
+          print("Sentence ended, saved to: ${file.path}");
+        } // twice
         // 👉 here you can upload to Whisper or process text
         final text = await runTranscription(file.path);
-        print("runTranscription return: $text");
+        AppLogger.logDebugEvent("question: $text");
         if (text != null && text.isNotEmpty) {
           _messages.add(ChatMessage(role: ChatRole.user, text: text));
           notifyListeners();
           final reply = await _repository.ask(text);
           if (reply.isNotEmpty) {
-            print("startRecording added message: $reply");
+            if (kDebugMode) {
+              print("startRecording added message: $reply");
+            }
             _messages.add(ChatMessage(role: ChatRole.openai, text: reply));
             notifyListeners();
             final tts = FlutterTts();
@@ -156,7 +165,9 @@ class ChatViewModel extends ChangeNotifier {
   }
 
   Future<String?> runTranscription(String path) async {
-    print("runTranscription with path: $path");
+    if (kDebugMode) {
+      print("runTranscription with path: $path");
+    }
     return await transRepo.transcribe(path);
   }
 

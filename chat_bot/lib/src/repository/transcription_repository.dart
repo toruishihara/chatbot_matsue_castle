@@ -1,4 +1,4 @@
-import 'package:ai_shop_list/src/network/open_ai_client.dart';
+import 'package:matsue_castle_chat_bot/src/network/open_ai_client.dart';
 import 'package:flutter/foundation.dart';
 // ignore: depend_on_referenced_packages
 import 'package:http_parser/http_parser.dart';
@@ -11,7 +11,9 @@ class TranscriptionRepository {
   final OpenAiClient api;
 
   Future<String?> transcribe(String path) async {
-    print("transccribe called with path: $path"); // twice
+    if (kDebugMode) {
+      print("transccribe called with path: $path");
+    } // twice
     try {
       final file = File(path); // e.g. /storage/emulated/0/…/sample.wav
       final text = await transcribeWav(
@@ -33,7 +35,9 @@ class TranscriptionRepository {
   }
 
   Future<String> transcribeWav(File wavFile, {String? language}) async {
-    print("transcribeWav called with file: ${wavFile.path}, language: $language");
+    if (kDebugMode) {
+      print("transcribeWav called with file: ${wavFile.path}, language: $language");
+    }
     final uri = Uri.https(api.base, '/v1/audio/transcriptions');
     final req = http.MultipartRequest('POST', uri)
       ..headers['Authorization'] = 'Bearer ${OpenAiClient.apiKey}'

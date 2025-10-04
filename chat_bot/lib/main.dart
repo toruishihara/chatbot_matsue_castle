@@ -1,4 +1,7 @@
-import 'package:ai_shop_list/src/repository/rag_repository.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:matsue_castle_chat_bot/src/network/app_logger.dart';
+import 'package:matsue_castle_chat_bot/src/repository/rag_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
@@ -17,6 +20,11 @@ void main() async {
 
   final settingsController = SettingsController(SettingsService());
   await settingsController.loadSettings();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  await AppLogger.init();
 
   final ragRepo = RagRepository();
 

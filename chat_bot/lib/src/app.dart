@@ -1,4 +1,4 @@
-import 'package:ai_shop_list/l10n/app_localizations.dart';
+import 'package:matsue_castle_chat_bot/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "42815676315",
+    "project_id": "matsue-castle-chat-bot",
+    "storage_bucket": "matsue-castle-chat-bot.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:42815676315:android:acb21a16eaa08b4d108b3e",
+        "android_client_info": {
+          "package_name": "com.github.toruishihara.chatbot_matsue_castle"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZN7giZZPKXFFr_pBKEsgoWhwTTI778d0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

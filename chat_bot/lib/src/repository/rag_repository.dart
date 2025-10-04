@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
+import 'package:matsue_castle_chat_bot/src/network/app_logger.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -99,9 +99,7 @@ class RagRepository {
       }),
     );
 
-    if (kDebugMode) {
-      print('OpenAI chat response: ${res.body}');
-    }
+    AppLogger.logDebugEvent('OpenAI chat response: ${res.body}');
     if (res.statusCode ~/ 100 != 2) {
       throw Exception('OpenAI chat error: ${res.statusCode} ${res.body}');
     }
@@ -126,13 +124,13 @@ class RagRepository {
       final md = (m['metadata'] as Map<String, dynamic>? ?? {});
       final text = (md['text'] ?? md['page_content'] ?? '').toString();
       // ignore: avoid_print
-      print('Match ${i + 1}: score=$score  text="${text.replaceAll("\n", " ").substring(0, text.length > 100 ? 100 : text.length)}"');
+      AppLogger.logDebugEvent('Match ${i + 1}: score=$score  text="${text.replaceAll("\n", " ").substring(0, text.length > 100 ? 100 : text.length)}"');
     }
 
     // 3) synthesize final answer
     final prompt = _buildPrompt(question, matches);
     final answer = await _chatComplete(prompt);
-    print('Final answer: $answer');
+    AppLogger.logDebugEvent('Answer: $answer');
     return answer;
   }
 

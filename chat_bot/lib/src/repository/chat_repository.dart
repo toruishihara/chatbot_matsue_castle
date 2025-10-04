@@ -1,4 +1,4 @@
-import 'package:ai_shop_list/src/network/open_ai_client.dart';
+import 'package:matsue_castle_chat_bot/src/network/open_ai_client.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
