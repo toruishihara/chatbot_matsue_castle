@@ -17,7 +17,7 @@ class AppLogger {
   /// Send a custom debug log event to Firebase
   static Future<void> logDebugEvent(String message) async {
     if (kDebugMode) {
-      print("debug_log:" + message);
+      print("debug_log:$message");
     }
     await _analytics.logEvent(
       name: "debug_log",
