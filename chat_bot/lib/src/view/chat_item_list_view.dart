@@ -20,7 +20,7 @@ class ChatItemListView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sample Items'),
+        title: const Text('Matsue Castle Chat Bot'),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),

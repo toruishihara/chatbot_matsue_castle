@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:matsue_castle_chat_bot/src/network/open_ai_client.dart';
 import 'package:flutter/foundation.dart';
 // ignore: depend_on_referenced_packages
@@ -39,8 +40,9 @@ class TranscriptionRepository {
       print("transcribeWav called with file: ${wavFile.path}, language: $language");
     }
     final uri = Uri.https(api.base, '/v1/audio/transcriptions');
+    final openAiKey = dotenv.env['OPENAI_API_KEY'] ?? '';
     final req = http.MultipartRequest('POST', uri)
-      ..headers['Authorization'] = 'Bearer ${OpenAiClient.apiKey}'
+      ..headers['Authorization'] = 'Bearer $openAiKey'
       ..fields['model'] = 'whisper-1'; // model name
     if (language != null && language.isNotEmpty) {
       req.fields['language'] = language; // e.g. "ja", "en"

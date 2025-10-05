@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:matsue_castle_chat_bot/src/network/open_ai_client.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -14,10 +15,11 @@ class ChatRepository {
   Future<Map<String, dynamic>> sendMessage(
       String userText) async {
     final uri = Uri.https(api.base, '/v1/chat/completions');
+    final openAiKey = dotenv.env['OPENAI_API_KEY'] ?? '';
     final res = await http.post(
       uri,
       headers: {
-        'Authorization': 'Bearer ${OpenAiClient.apiKey}',
+        'Authorization': 'Bearer $openAiKey',
         'Content-Type': 'application/json',
       },
       body: jsonEncode({
