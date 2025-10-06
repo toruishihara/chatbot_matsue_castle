@@ -11,12 +11,10 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 import '../model/chat_message.dart';
-import '../network/open_ai_client.dart';
 
 class ChatViewModel extends ChangeNotifier {
-  final OpenAiClient _client;
-  late final chatRepo = ChatRepository(_client);
-  late final transRepo = TranscriptionRepository(_client);
+  late final chatRepo = ChatRepository();
+  late final transRepo = TranscriptionRepository();
   final RagRepository _repository;
   RecordUntilSilence? _recorder;
   bool _isRecording = false;
@@ -30,7 +28,7 @@ class ChatViewModel extends ChangeNotifier {
   final List<ChatMessage> _messages = [];
   List<ChatMessage> get messages => List.unmodifiable(_messages);
 
-  ChatViewModel(this._client, this._repository);
+  ChatViewModel(this._repository);
 
   Future<String?> sendMessage(String text) async {
     _loading = true;

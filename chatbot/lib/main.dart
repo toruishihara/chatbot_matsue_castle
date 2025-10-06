@@ -7,7 +7,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 
 import 'src/app.dart';
-import 'src/network/open_ai_client.dart';
 import 'src/settings/settings_controller.dart';
 import 'src/settings/settings_service.dart';
 import 'src/view_model/chat_view_model.dart';
@@ -30,7 +29,7 @@ void main() async {
 
   runApp(
     ChangeNotifierProvider(
-      create: (_) => ChatViewModel(OpenAiClient(), ragRepo),
+      create: (_) => ChatViewModel(ragRepo),
       child: MyApp(settingsController: settingsController),
     ),
   );

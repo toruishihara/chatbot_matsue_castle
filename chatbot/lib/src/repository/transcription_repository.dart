@@ -1,5 +1,4 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:matsue_castle_chat_bot/src/network/open_ai_client.dart';
 import 'package:flutter/foundation.dart';
 // ignore: depend_on_referenced_packages
 import 'package:http_parser/http_parser.dart';
@@ -8,8 +7,7 @@ import 'package:http/http.dart' as http;
 import 'dart:io';
 
 class TranscriptionRepository {
-  TranscriptionRepository(this.api);
-  final OpenAiClient api;
+  TranscriptionRepository();
 
   Future<String?> transcribe(String path) async {
     if (kDebugMode) {
@@ -17,10 +15,7 @@ class TranscriptionRepository {
     } // twice
     try {
       final file = File(path); // e.g. /storage/emulated/0/…/sample.wav
-      final text = await transcribeWav(
-        file,
-        language: 'en', // optional
-      );
+      final text = await transcribeWav(file);
       // use `text` (update state, notify listeners, etc.)
       if (kDebugMode) {
         print('TranscriptionRepository:transcribe $text'); // twice
@@ -35,18 +30,16 @@ class TranscriptionRepository {
     }
   }
 
-  Future<String> transcribeWav(File wavFile, {String? language}) async {
+  Future<String> transcribeWav(File wavFile) async {
     if (kDebugMode) {
-      print("transcribeWav called with file: ${wavFile.path}, language: $language");
+      print("transcribeWav called with file: ${wavFile.path}");
     }
-    final uri = Uri.https(api.base, '/v1/audio/transcriptions');
+    final uri = Uri.https('api.openai.com', '/v1/audio/transcriptions');
     final openAiKey = dotenv.env['OPENAI_API_KEY'] ?? '';
     final req = http.MultipartRequest('POST', uri)
       ..headers['Authorization'] = 'Bearer $openAiKey'
       ..fields['model'] = 'whisper-1'; // model name
-    if (language != null && language.isNotEmpty) {
-      req.fields['language'] = language; // e.g. "ja", "en"
-    }
+      //..fields['language'] = "ja"; // e.g. "ja", "en"
     req.files.add(
       await http.MultipartFile.fromPath(
         'file',

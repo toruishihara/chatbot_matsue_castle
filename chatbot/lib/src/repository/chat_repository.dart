@@ -1,20 +1,18 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:matsue_castle_chat_bot/src/network/open_ai_client.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 // https://matsue-castle-qbt5u45.svc.aped-4627-b74a.pinecone.io
 
 class ChatRepository {
-  ChatRepository(this.api);
-  final OpenAiClient api;
+  ChatRepository();
 
   final List<Map<String, String>> _history = [];
   List<Map<String, String>> get history => List.unmodifiable(_history);
 
   Future<Map<String, dynamic>> sendMessage(
       String userText) async {
-    final uri = Uri.https(api.base, '/v1/chat/completions');
+    final uri = Uri.https('api.openai.com', '/v1/chat/completions');
     final openAiKey = dotenv.env['OPENAI_API_KEY'] ?? '';
     final res = await http.post(
       uri,
