@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:matsue_castle_chat_bot/src/audio/record_until_silence.dart';
 import 'package:matsue_castle_chat_bot/src/network/app_logger.dart';
-import 'package:matsue_castle_chat_bot/src/repository/chat_repository.dart';
 import 'package:matsue_castle_chat_bot/src/repository/rag_repository.dart';
 import 'package:matsue_castle_chat_bot/src/repository/transcription_repository.dart';
 import 'package:flutter/foundation.dart';
@@ -13,9 +12,9 @@ import 'package:record/record.dart';
 import '../model/chat_message.dart';
 
 class ChatViewModel extends ChangeNotifier {
-  late final chatRepo = ChatRepository();
+  //late final chatRepo = ChatRepository();
   late final transRepo = TranscriptionRepository();
-  final RagRepository _repository;
+  late final ragRepo = RagRepository();
   RecordUntilSilence? _recorder;
   bool _isRecording = false;
   File? lastFile;
@@ -28,7 +27,7 @@ class ChatViewModel extends ChangeNotifier {
   final List<ChatMessage> _messages = [];
   List<ChatMessage> get messages => List.unmodifiable(_messages);
 
-  ChatViewModel(this._repository);
+  ChatViewModel();
 
   Future<String?> sendMessage(String text) async {
     _loading = true;
@@ -37,15 +36,14 @@ class ChatViewModel extends ChangeNotifier {
     try {
       if (kDebugMode) {
         print("added message0: $text");
+        //dumpString(text);
       }
       _messages.add(ChatMessage(role: ChatRole.user, text: text));
       notifyListeners();
-      final json = await chatRepo.sendMessage(text);
-      final content = json['choices'][0]['message']['content'] as String;
-      final inner = jsonDecode(content) as Map<String, dynamic>;
-      final reply = inner['message'] as String;
+      final reply = await ragRepo.sendMessage(text);
       if (kDebugMode) {
-        print("added message0: $reply");
+        print("added message1: $reply");
+        //dumpString(reply);
       }
       _messages.add(ChatMessage(role: ChatRole.openai, text: reply));
       notifyListeners();
@@ -53,6 +51,9 @@ class ChatViewModel extends ChangeNotifier {
       notifyListeners();
       return reply;
     } catch (e) {
+      if (kDebugMode) {
+        print("Error chatRepo.sendMessage: $e");
+      }
       _messages.add(ChatMessage(role: ChatRole.openai, text: e.toString()));
       _loading = false;
       notifyListeners();
@@ -65,7 +66,7 @@ class ChatViewModel extends ChangeNotifier {
       await startRecording();
     } catch (e, st) {
       if (kDebugMode) {
-        print("Error starting recording: $e");
+        print("Error startRecording: $e");
         print(st);
       }
     }
@@ -91,7 +92,7 @@ class ChatViewModel extends ChangeNotifier {
         if (text != null && text.isNotEmpty) {
           _messages.add(ChatMessage(role: ChatRole.user, text: text));
           notifyListeners();
-          final reply = await _repository.ask(text);
+          final reply = await ragRepo.sendMessage(text);
           if (reply.isNotEmpty) {
             if (kDebugMode) {
               print("startRecording added message: $reply");
@@ -180,5 +181,16 @@ class ChatViewModel extends ChangeNotifier {
     final path = '${dir.path}/rec_${DateTime.now().millisecondsSinceEpoch}.wav';
     final file = File(path);
     return file;
+  }
+  
+  void dumpString(String text) {
+    List<int> bytes = utf8.encode(text); // Convert to UTF-8 bytes
+
+    // Dump as HEX string
+    String hexDump =
+        bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join(' ');
+    if (kDebugMode) {
+      print(hexDump);
+    }
   }
 }

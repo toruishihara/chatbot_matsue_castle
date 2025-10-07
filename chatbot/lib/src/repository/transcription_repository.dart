@@ -24,7 +24,7 @@ class TranscriptionRepository {
     } catch (e, st) {
       // handle errors (network, file not found, 401, etc.)
       if (kDebugMode) {
-        print('Transcription failed: $e\n$st');
+        print('Error transcribeWav: $e\n$st');
       }
       return null;
     }

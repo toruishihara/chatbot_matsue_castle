@@ -109,7 +109,7 @@ class RagRepository {
   }
 
   /// === Public: Full RetrievalQA (Python's qa.run("質問")) ===
-  Future<String> ask(String question) async {
+  Future<String> sendMessage(String question) async {
     // 1) embed the question
     final v = await _embed(question);
 

@@ -49,6 +49,8 @@ class _ChatItemListViewState extends State<ChatItemListView> {
               );
               break;
             case 1: // Help
+              _showHelpDialog(context);
+              /*
               showModalBottomSheet(
                 context: context,
                 showDragHandle: true,
@@ -59,6 +61,7 @@ class _ChatItemListViewState extends State<ChatItemListView> {
                   ),
                 ),
               );
+              */
               break;
             case 2: // Settings
               Navigator.restorablePushNamed(context, SettingsView.routeName);
@@ -125,97 +128,27 @@ class _ChatItemListViewState extends State<ChatItemListView> {
       ],
     );
   }
-}
 
-
-/// Displays a list of ChatItems.
-/*
-class ChatItemListView extends StatelessWidget {
-  const ChatItemListView({
-    super.key,
-  });
-
-  static const routeName = '/';
-
-  @override
-  Widget build(BuildContext context) {
-    Provider.of<ChatViewModel>(context);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Matsue Castle Chat Bot'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              // Navigate to the settings page. If the user leaves and returns
-              // to the app after it has been killed while running in the
-              // background, the navigation stack is restored.
-              Navigator.restorablePushNamed(context, SettingsView.routeName);
-            },
+    /// Show Help dialog
+  void _showHelpDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Help & Tips'),
+          content: const Text(
+            '🗣️ You can talk or type to the bot about Matsue Castle.\n\n'
+            '🎙️ Tap the microphone to ask by voice.\n\n'
+            '⚙️ You can change settings in the top-right menu.',
           ),
-        ],
-      ),
-      body: buildChatColumn(context)
-    );
-  }
-
-  Widget buildChatColumn(BuildContext context) {
-    final chatViewModel = Provider.of<ChatViewModel>(context);
-    return Column(
-      children: [
-        Expanded(
-          child: ListView.builder(
-            itemCount: chatViewModel.messages.length,
-            itemBuilder: (context, index) {
-              final msg = chatViewModel.messages[index];
-              final isUser = msg.role == ChatRole.user;
-              return Align(
-                alignment:
-                    isUser ? Alignment.centerRight : Alignment.centerLeft,
-                child: Column(
-                  crossAxisAlignment: isUser
-                      ? CrossAxisAlignment.end
-                      : CrossAxisAlignment.start,
-                  children: [
-                    Text(msg.text),
-                    Text(isUser ? 'User' : 'Assistant',
-                        style:
-                            const TextStyle(fontSize: 12, color: Colors.grey)),
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: TextField(
-            decoration: InputDecoration(
-              labelText: 'Enter text',
-              border: const OutlineInputBorder(),
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.mic),
-                onPressed: () {
-                  if (kDebugMode) {
-                    print("Mic pressed");
-                  }
-                  final vm = context.read<ChatViewModel>();
-                  vm.handleMicButton();
-                },
-              ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
             ),
-            onSubmitted: (value) async {
-              if (value.trim().isEmpty) return;
-              // read your ViewModel
-              final vm = context.read<ChatViewModel>();
-              // await the async function
-              await vm.sendMessage(value.trim());
-            },
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 }
-*/

@@ -25,24 +25,13 @@ void main() async {
   );
   await AppLogger.init();
 
-  final ragRepo = RagRepository();
-
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => ChatViewModel(ragRepo)),
+        ChangeNotifierProvider(create: (_) => ChatViewModel()),
         ChangeNotifierProvider<SettingsController>.value(value: settingsController),
       ],
       child: MyApp(settingsController: settingsController),
     ),
   );
-
-/*
-  runApp(
-    ChangeNotifierProvider(
-      create: (_) => ChatViewModel(ragRepo),
-      child: MyApp(settingsController: settingsController),
-    ),
-  );
-*/
 }
