@@ -1,6 +1,8 @@
 import 'package:matsue_castle_chat_bot/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:matsue_castle_chat_bot/src/settings/settings_view.dart';
+import 'package:provider/provider.dart';
 
 import 'view/chat_item_list_view.dart';
 import 'settings/settings_controller.dart';
@@ -40,6 +42,7 @@ class MyApp extends StatelessWidget {
             GlobalCupertinoLocalizations.delegate,
           ],
           supportedLocales: const [
+            Locale('ja', ''),
             Locale('en', ''), // English, no country code
           ],
 
@@ -65,7 +68,11 @@ class MyApp extends StatelessWidget {
             return MaterialPageRoute<void>(
               settings: routeSettings,
               builder: (BuildContext context) {
+                final settingsController = Provider.of<SettingsController>(context, listen: false);
+
                 switch (routeSettings.name) {
+                  case SettingsView.routeName:
+                    return SettingsView(controller: settingsController);
                   default:
                     return const ChatItemListView();
                 }
