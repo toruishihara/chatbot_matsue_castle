@@ -1,7 +1,7 @@
 # index_to_pinecone.py
 import os, glob
 import re
-from xml.dom.minidom import Document
+from langchain_core.documents import Document
 from dotenv import load_dotenv
 
 from langchain_community.document_loaders import TextLoader, PyPDFLoader, WikipediaLoader, WebBaseLoader, CSVLoader
@@ -38,11 +38,11 @@ def load_pdf_strip_ruby(path: str):
     return cleaned
 
 load_dotenv()
+print("USER_AGENT:", os.getenv("USER_AGENT"))
+
 OPENAI_API_KEY   = os.getenv("OPENAI_API_KEY")
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
-
-# Optional: set a UA for polite crawling
-os.environ.setdefault("USER_AGENT", "MatsueBot/1.0 (+https://example.com)")
+USER_AGENT = os.getenv("USER_AGENT")
 
 # ---- 1) Collect files (both .txt and .pdf) ----
 paths = []
@@ -70,9 +70,11 @@ loader = WikipediaLoader(query="松江城", lang="ja", load_max_docs=1)
 docs.extend(loader.load())
 
 urls = [
-    "https://www.japan-guide.com/e/e5801.html",
+    "https://www.japan.travel/en/spot/933/",
     "https://www.matsue-castle.jp/highlight/citadel",
     "https://www.homemate-research-castle.com/useful/16943_tour_024/",
+    "https://www.kankou-shimane.com/en/destinations/9289",
+    "https://www.kanpai-japan.com/matsue/castle"
 ]
 loader = UnstructuredURLLoader(urls)
 #for url in urls:

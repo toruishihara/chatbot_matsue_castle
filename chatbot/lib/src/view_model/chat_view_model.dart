@@ -7,14 +7,18 @@ import 'package:matsue_castle_chat_bot/src/repository/rag_repository.dart';
 import 'package:matsue_castle_chat_bot/src/repository/transcription_repository.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:matsue_castle_chat_bot/src/settings/settings_controller.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 import '../model/chat_message.dart';
 
 class ChatViewModel extends ChangeNotifier {
+  final SettingsController settings;
+  ChatViewModel(this.settings);
+
   //late final chatRepo = ChatRepository();
-  late final transRepo = TranscriptionRepository();
-  late final ragRepo = RagRepository();
+  late final transRepo = TranscriptionRepository(settings);
+  late final ragRepo = RagRepository(settings);
   RecordUntilSilence? _recorder;
   bool _isRecording = false;
   File? lastFile;
@@ -26,8 +30,6 @@ class ChatViewModel extends ChangeNotifier {
 
   final List<ChatMessage> _messages = [];
   List<ChatMessage> get messages => List.unmodifiable(_messages);
-
-  ChatViewModel();
 
   Future<String?> sendMessage(String text) async {
     _loading = true;

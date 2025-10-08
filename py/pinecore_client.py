@@ -6,6 +6,8 @@ from langchain_openai import OpenAIEmbeddings
 from langchain.chains import RetrievalQA
 from langchain_openai import ChatOpenAI
 
+print_Matches = True
+
 load_dotenv()
 pc = Pinecone(api_key=os.environ["PINECONE_API_KEY"])
 
@@ -27,10 +29,10 @@ qa = RetrievalQA.from_chain_type(
     chain_type="stuff"
 )
 
-result = qa.run("松江城の別名は？")
-print("RetrievalQA Answer:", result)
+result = qa.run("What is nickname of Matsue Castle?")
+print("RAG Answer:", result)
 
-query = "松江城の別名は？"
+query = "What is nickname of Matsue Castle?"
 vector = emb.embed_query(query)
 
 res = index.query(
@@ -39,14 +41,15 @@ res = index.query(
     include_metadata=True
 )
 
-print("embed_query:", query)
-
-if res.matches:
-    for i, match in enumerate(res.matches, start=1):
-        text = match.metadata.get("text", "") if match.metadata else ""
-        print(f"Match {i}: score={match.score:.4f}")
-        print("Text:", text[:120])  # print first 120 chars
-        print("-" * 40)
-else:
-    print("No matches found")
+if print_Matches:
+    if res.matches:
+        for i, match in enumerate(res.matches, start=1):
+            text = match.metadata.get("text", "") if match.metadata else ""
+            source = match.metadata.get("source", "N/A") if match.metadata else "N/A"
+            print(f"Match {i}: score={match.score:.4f}")
+            print("Text:", text[:120])  # print first 120 chars
+            print("Source:", source)
+            print("-" * 40)
+    else:
+        print("No matches found")
 

@@ -23,7 +23,7 @@ class _ChatItemListViewState extends State<ChatItemListView> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Matsue Castle Chat Bot'),
+        title: const Text('Matsue Castle Chatbot'),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
@@ -43,7 +43,7 @@ class _ChatItemListViewState extends State<ChatItemListView> {
             case 0: // About
               showAboutDialog(
                 context: context,
-                applicationName: 'Matsue Castle Chat Bot',
+                applicationName: 'Matsue Castle Chatbot',
                 applicationVersion: '1.0.0',
                 applicationLegalese: '© 2025 Toru Ishihara',
               );

@@ -5,18 +5,31 @@ import 'package:http_parser/http_parser.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:io';
+import 'package:matsue_castle_chat_bot/src/settings/settings_controller.dart';
 
+const String whisperPromptJp =
+'''      
+以下の音声は松江城に関するガイドです。松江城, 千鳥城, 堀尾吉晴, 
+宍道湖, 城主, 天守閣, 堀, 土塁, 石垣, 櫓（やぐら）, 城
+などの言葉が登場します。
+''';
+const String whisperPromptEn =
+'''
+This audio is a guide about Matsue Castle. Words such as Matsue Castle, Chidori Castle, Yoshiharu Horio, 
+Lake Shinji, lord, castle keep, moat, earthen rampart, stone wall, turret, and castle
+appear.
+''';
 class TranscriptionRepository {
-  TranscriptionRepository();
+  final SettingsController settings;
+  TranscriptionRepository(this.settings);
 
   Future<String?> transcribe(String path) async {
     if (kDebugMode) {
       print("transccribe called with path: $path");
-    } // twice
+    }
     try {
-      final file = File(path); // e.g. /storage/emulated/0/…/sample.wav
+      final file = File(path);
       final text = await transcribeWav(file);
-      // use `text` (update state, notify listeners, etc.)
       if (kDebugMode) {
         print('TranscriptionRepository:transcribe $text'); // twice
       }
@@ -32,14 +45,27 @@ class TranscriptionRepository {
 
   Future<String> transcribeWav(File wavFile) async {
     if (kDebugMode) {
+      final lang = settings.langMode;
+      print('Current language = $lang');
       print("transcribeWav called with file: ${wavFile.path}");
     }
     final uri = Uri.https('api.openai.com', '/v1/audio/transcriptions');
     final openAiKey = dotenv.env['OPENAI_API_KEY'] ?? '';
     final req = http.MultipartRequest('POST', uri)
       ..headers['Authorization'] = 'Bearer $openAiKey'
-      ..fields['model'] = 'whisper-1'; // model name
-      //..fields['language'] = "ja"; // e.g. "ja", "en"
+      ..fields['model'] = 'whisper-1';
+
+    final lang = settings.langMode;
+    if (lang == LangMode.jp) {
+      req.fields['language'] = 'ja';
+      req.fields['prompt'] = whisperPromptJp;
+    } else if (lang == LangMode.en) {
+      req.fields['language'] = 'en';
+      req.fields['prompt'] = whisperPromptEn;
+    } else {
+      req.fields['prompt'] = whisperPromptJp + whisperPromptEn;
+    }
+
     req.files.add(
       await http.MultipartFile.fromPath(
         'file',

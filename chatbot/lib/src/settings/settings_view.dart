@@ -21,6 +21,71 @@ class SettingsView extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // --- First Dropdown: Theme ---
+            const Text(
+              'Theme',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            DropdownButton<ThemeMode>(
+              value: controller.themeMode,
+              onChanged: controller.updateThemeMode,
+              items: const [
+                DropdownMenuItem(
+                  value: ThemeMode.system,
+                  child: Text('System Theme'),
+                ),
+                DropdownMenuItem(
+                  value: ThemeMode.light,
+                  child: Text('Light Theme'),
+                ),
+                DropdownMenuItem(
+                  value: ThemeMode.dark,
+                  child: Text('Dark Theme'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            // --- Second Dropdown: Language ---
+            const Text(
+              'Language',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            DropdownButton<LangMode>(
+              value: controller.langMode, // add language to controller
+              onChanged: controller.updateLangMode,
+              items: const [
+                DropdownMenuItem(
+                  value: LangMode.auto,
+                  child: Text('Auto Detect'),
+                ),
+                DropdownMenuItem(
+                  value: LangMode.en,
+                  child: Text('English'),
+                ),
+                DropdownMenuItem(
+                  value: LangMode.jp,
+                  child: Text('日本語'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+/*
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Settings'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
         // Glue the SettingsController to the theme selection DropdownButton.
         //
         // When a user selects a theme from the dropdown list, the
@@ -48,4 +113,5 @@ class SettingsView extends StatelessWidget {
       ),
     );
   }
+*/
 }

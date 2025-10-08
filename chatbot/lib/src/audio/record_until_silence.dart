@@ -15,6 +15,7 @@ class RecordUntilSilence {
   int _dataLength = 0;
   int _durationMs = 0;
   int _silenceMs = 0;
+  bool _isStopping = false;
 
   /// Parameters
   final int sampleRate;
@@ -55,6 +56,7 @@ class RecordUntilSilence {
         throw Exception("Microphone permission denied");
       }
     }
+    _isStopping = false;
     final file = File(path);
     _fileSink = file.openWrite();
 
@@ -78,10 +80,11 @@ class RecordUntilSilence {
       _durationMs += _chunkDurationMs(buffer);
       //dumpFirst32(buffer);
 
-      if (_durationMs == 5000 && _isRecording == true) {
+      if (_durationMs == 5000 && _isRecording == true && _isStopping == false) {
         if (kDebugMode) {
-          print("Max duration reached, stopping");
+          print("Max duration reached, calling stop() in start() L85");
         }
+        _isStopping = true;
         await stop(file);
         onSentenceEnd?.call(file); // notify caller
         return;
@@ -92,11 +95,12 @@ class RecordUntilSilence {
           print("Detected silence in chunk");
         }
         _silenceMs += _chunkDurationMs(buffer);
-        if (_silenceMs > silenceDurationMs) {
+        if (_silenceMs > silenceDurationMs && !_isStopping) {
           if (kDebugMode) {
-            print("Calling stop() _silenceMs=$_silenceMs");
+            print("Calling stop() in start() L100 _silenceMs=$_silenceMs _isStopping=$_isStopping");
           }
-          await stop(file); // auto stop
+          _isStopping = true;
+          await stop(file);
           //print("calling onSentenceEnd");
           onSentenceEnd?.call(file); // notify caller
         }
@@ -120,6 +124,7 @@ class RecordUntilSilence {
 
     _patchWavHeader(file, _dataLength, sampleRate, numChannels);
     _isRecording = false;
+    _isStopping = false;
     if (kDebugMode) {
       print("_isRecording = false");
     }

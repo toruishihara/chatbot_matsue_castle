@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:matsue_castle_chat_bot/src/settings/settings_controller.dart';
 
 /// A service that stores and retrieves user settings.
 ///
@@ -14,4 +15,11 @@ class SettingsService {
     // Use the shared_preferences package to persist settings locally or the
     // http package to persist settings over the network.
   }
+
+  Future<LangMode> langMode() async => LangMode.auto;
+  Future<void> updateLangMode(LangMode lang) async {
+    // Use the shared_preferences package to persist settings locally or the
+    // http package to persist settings over the network.
+  }
+
 }
