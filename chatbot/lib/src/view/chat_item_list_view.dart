@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:matsue_castle_chatbot/src/view/about_screen.dart';
 import 'package:provider/provider.dart';
 
 import '../model/chat_message.dart';
@@ -41,11 +42,9 @@ class _ChatItemListViewState extends State<ChatItemListView> {
           setState(() => _selectedIndex = i);
           switch (i) {
             case 0: // About
-              showAboutDialog(
-                context: context,
-                applicationName: 'Matsue Castle Chatbot',
-                applicationVersion: '1.0.0',
-                applicationLegalese: '© 2025 Toru Ishihara',
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AboutScreen()),
               );
               break;
             case 1: // Help

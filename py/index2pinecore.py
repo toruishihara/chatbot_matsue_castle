@@ -109,6 +109,19 @@ print(f"Loaded {len(docs)} raw documents")
 
 loader = WikipediaLoader(query="松江城", lang="ja", load_max_docs=1)
 docs.extend(loader.load())
+loader = WikipediaLoader(query="日本の城", lang="ja", load_max_docs=1)
+docs.extend(loader.load())
+loader = WikipediaLoader(query="天守", lang="ja", load_max_docs=1)
+docs.extend(loader.load())
+loader = WikipediaLoader(query="現存天守", lang="ja", load_max_docs=1)
+docs.extend(loader.load())
+
+loader = WikipediaLoader(query="Matsue Castle", lang="en", load_max_docs=1)
+docs.extend(loader.load())
+loader = WikipediaLoader(query="Japanese castle", lang="en", load_max_docs=1)
+docs.extend(loader.load())
+loader = WikipediaLoader(query="Tenshu", lang="en", load_max_docs=1)
+docs.extend(loader.load())
 
 urls = [
     "https://www.japan.travel/en/spot/933/",
