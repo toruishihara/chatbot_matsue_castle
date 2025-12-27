@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:matsue_castle_chat_bot/src/settings/settings_controller.dart';
+import 'package:matsue_castle_chatbot/src/settings/settings_controller.dart';
 
 /// A service that stores and retrieves user settings.
 ///

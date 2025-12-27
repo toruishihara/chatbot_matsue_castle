@@ -37,9 +37,7 @@ class ChatRepository {
         ],
       }),
     );
-    if (kDebugMode) {
-      print('Response status: ${res.statusCode}');
-    }
+    print('Response status: ${res.statusCode}');
     dumpBodyAsHex(res);
     if (res.statusCode >= 200 && res.statusCode < 300) {
       return res.body;

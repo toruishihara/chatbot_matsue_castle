@@ -5,7 +5,7 @@ import 'package:http_parser/http_parser.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:io';
-import 'package:matsue_castle_chat_bot/src/settings/settings_controller.dart';
+import 'package:matsue_castle_chatbot/src/settings/settings_controller.dart';
 
 const String whisperPromptJp =
 '''      

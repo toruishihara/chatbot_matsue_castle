@@ -64,7 +64,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '42815676315',
     projectId: 'matsue-castle-chat-bot',
     storageBucket: 'matsue-castle-chat-bot.firebasestorage.app',
-    iosBundleId: 'com.github.toruishihara.aiShopList',
+    iosBundleId: 'com.github.toruishihara.matsue-castle-chat-bot',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -73,7 +73,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '42815676315',
     projectId: 'matsue-castle-chat-bot',
     storageBucket: 'matsue-castle-chat-bot.firebasestorage.app',
-    iosBundleId: 'com.example.aiShopList',
+    iosBundleId: 'com.github.toruishihara.matsue-castle-chat-bot',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(

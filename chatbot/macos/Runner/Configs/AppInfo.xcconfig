@@ -8,8 +8,8 @@
 PRODUCT_NAME = ai_shop_list
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.aiShopList
+PRODUCT_BUNDLE_IDENTIFIER = com.github.toruishihara.chatbot_matsue_castle
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2025 com.example. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2025 com.github.toruishihara All rights reserved.
 MACOSX_DEPLOYMENT_TARGET = 10.15

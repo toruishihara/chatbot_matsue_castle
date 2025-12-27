@@ -1,7 +1,7 @@
-import 'package:matsue_castle_chat_bot/l10n/app_localizations.dart';
+import 'package:matsue_castle_chatbot/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:matsue_castle_chat_bot/src/settings/settings_view.dart';
+import 'package:matsue_castle_chatbot/src/settings/settings_view.dart';
 import 'package:provider/provider.dart';
 
 import 'view/chat_item_list_view.dart';
@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
           ],
           supportedLocales: const [
             Locale('ja', ''),
-            Locale('en', ''), // English, no country code
+            Locale('en', ''),
           ],
 
           // Use AppLocalizations to configure the correct application title

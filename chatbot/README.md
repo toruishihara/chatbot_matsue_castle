@@ -1,4 +1,4 @@
-# ai_shop_list
+# chatbot_matsue_castle
 
 A new Flutter project.
 

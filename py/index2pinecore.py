@@ -1,16 +1,20 @@
-# index_to_pinecone.py
-import os, glob
+import sys, os, glob
 import re
+sys.path.append(os.path.join(os.path.dirname(__file__), "."))  # add current folder
 from langchain_core.documents import Document
 from dotenv import load_dotenv
 
 from langchain_community.document_loaders import TextLoader, PyPDFLoader, WikipediaLoader, WebBaseLoader, CSVLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_text_splitters import MarkdownHeaderTextSplitter, RecursiveCharacterTextSplitter
 from langchain_text_splitters import CharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
 from pinecone import Pinecone, ServerlessSpec
 from langchain_community.document_loaders import UnstructuredURLLoader
+from typing import Dict, List, Optional
+from uuid import uuid5, NAMESPACE_URL
+from md import load_markdown_with_headers
 
 def strip_furigana(text: str) -> str:
     # 例: 「大 おお 海 み 崎 さき 石」 → 「大海崎石」
@@ -37,6 +41,39 @@ def load_pdf_strip_ruby(path: str):
         cleaned.append(Document(page_content=text, metadata=d.metadata))
     return cleaned
 
+def sanitize_meta(m: dict) -> dict:
+    out = {}
+    for k, v in (m or {}).items():
+        if v is None:
+            continue  # drop nulls entirely
+
+        # --- normalize key names (optional, Pinecone prefers short lowercase)
+        key = str(k).strip().lower()
+
+        # --- primitive types
+        if isinstance(v, (str, bool, int, float)):
+            # strip whitespace from strings, skip empty strings
+            if isinstance(v, str):
+                v = v.strip()
+                if not v:
+                    continue
+            out[key] = v
+
+        # --- list types
+        elif isinstance(v, list):
+            # only allow list[str], coercing to strings
+            vals = [str(x).strip() for x in v if x not in (None, "")]
+            if vals:
+                out[key] = vals
+
+        # --- fallback: coerce everything else to string
+        else:
+            val = str(v).strip()
+            if val:
+                out[key] = val
+
+    return out
+
 load_dotenv()
 print("USER_AGENT:", os.getenv("USER_AGENT"))
 
@@ -46,9 +83,10 @@ USER_AGENT = os.getenv("USER_AGENT")
 
 # ---- 1) Collect files (both .txt and .pdf) ----
 paths = []
-paths += glob.glob("data/**/*.txt", recursive=True)
+paths += glob.glob("data/**/*.md", recursive=True)
 paths += glob.glob("data/**/*.pdf", recursive=True)
 paths += glob.glob("data/**/*.csv", recursive=True)
+paths += glob.glob("data/**/*.txt", recursive=True)
 
 # ---- 2) Load docs with proper loader per type ----
 docs = []
@@ -60,6 +98,9 @@ for p in paths:
     elif p.lower().endswith(".csv"):
         loader = CSVLoader(p, encoding="utf-8")
         docs.extend(loader.load())
+    elif p.endswith(".md") or p.endswith(".markdown"):
+        md_docs = load_markdown_with_headers(p)
+        docs.extend(md_docs)
     else:
         loader = TextLoader(p, encoding="utf-8")
         docs.extend(loader.load())
@@ -85,7 +126,7 @@ print(f"Loaded {len(docs)} document segments from {len(paths)} files.")
 
 # ---- 3) Split into chunks (keep some overlap) ----
 splitter = RecursiveCharacterTextSplitter(
-    chunk_size=500,          # 文字数ベース（300–800が一般的）
+    chunk_size=500,          # 文字数ベース（300-800が一般的）
     chunk_overlap=50,        # コンテキストを維持するための重なり
     separators = ["\n\n", "\n", "。", "、", " "],
     keep_separator=False  # 優先順位つき
@@ -103,10 +144,13 @@ for chunk in first_chunks:
 
 print(f"Split into {len(merged_chunks)} chunks.")
 # 各チャンクを確認
-for i, chunk in enumerate(merged_chunks[:10]):  # 最初の10件だけ
+for i, chunk in enumerate(merged_chunks[:99]):  # 最初の10件だけ
     print("=" * 40)
     print(f"Chunk {i+1}")
     print(f"Source: {chunk.metadata.get('source', 'N/A')}")
+    print(f"h1: {chunk.metadata.get('h1', 'N/A')}")
+    print(f"h2: {chunk.metadata.get('h2', 'N/A')}")
+    print(f"h3: {chunk.metadata.get('h3', 'N/A')}")
     print(f"Content:\n{chunk.page_content[:200]}")  # 最初の200文字だけ表示
 
 # ---- 4) Pinecone index (create if missing) ----
@@ -130,6 +174,10 @@ if index_name not in pc.list_indexes().names():
         )
     )
 
+# Apply to every doc before from_documents()
+for d in merged_chunks:
+    d.metadata = sanitize_meta(d.metadata)
+
 # ---- 5) Embed + upsert to Pinecone ----
 emb = OpenAIEmbeddings(model="text-embedding-3-large", api_key=OPENAI_API_KEY)
 vs = PineconeVectorStore.from_documents(
@@ -138,5 +186,16 @@ vs = PineconeVectorStore.from_documents(
     index_name=index_name
 )
 
-print("✅ Uploaded to Pinecone with PDF+TXT support.")
+print(" Uploaded to Pinecone with PDF+TXT support.")
 
+pc = Pinecone(api_key=PINECONE_API_KEY)
+idx = pc.Index(index_name)
+
+# Grab one inserted id from the LangChain store if you kept them,
+# otherwise query and inspect the first match:
+res = idx.query(
+    vector=[0.0]*3072,  # or use a real embedding to query
+    top_k=1,
+    include_metadata=True
+)
+print(res.matches[0].metadata)  # Expect 'h1','h2','h3' when present

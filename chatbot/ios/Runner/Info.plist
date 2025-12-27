@@ -47,5 +47,7 @@
 	</array>
 	<key>NSMicrophoneUsageDescription</key>
     <string>We need your microphone to record audio.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>We need your speech to text for audio transcription.</string>
 </dict>
 </plist>

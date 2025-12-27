@@ -1,8 +1,8 @@
 import 'dart:convert';
-import 'package:matsue_castle_chat_bot/src/network/app_logger.dart';
+import 'package:matsue_castle_chatbot/src/network/app_logger.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:matsue_castle_chat_bot/src/settings/settings_controller.dart';
+import 'package:matsue_castle_chatbot/src/settings/settings_controller.dart';
 
 /// Pick the model that matches your Pinecone index dimensions.
 /// - text-embedding-3-small  -> 1536 dims
@@ -151,7 +151,7 @@ class RagRepository {
       final text = (md['text'] ?? md['page_content'] ?? '').toString();
       // ignore: avoid_print
       AppLogger.logDebugEvent(
-          'Match ${i + 1}: score=$score  text="${text.replaceAll("\n", " ").substring(0, text.length > 100 ? 100 : text.length)}"');
+          'Match ${i + 1}: score=$score meta=$md text="${text.replaceAll("\n", " ").substring(0, text.length > 100 ? 100 : text.length)}"');
     }
 
     // 3) synthesize final answer

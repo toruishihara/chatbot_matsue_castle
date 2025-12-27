@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:matsue_castle_chat_bot/src/audio/record_until_silence.dart';
-import 'package:matsue_castle_chat_bot/src/network/app_logger.dart';
-import 'package:matsue_castle_chat_bot/src/repository/rag_repository.dart';
-import 'package:matsue_castle_chat_bot/src/repository/transcription_repository.dart';
+import 'package:matsue_castle_chatbot/src/audio/record_until_silence.dart';
+import 'package:matsue_castle_chatbot/src/network/app_logger.dart';
+import 'package:matsue_castle_chatbot/src/repository/rag_repository.dart';
+import 'package:matsue_castle_chatbot/src/repository/transcription_repository.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:matsue_castle_chat_bot/src/settings/settings_controller.dart';
+import 'package:matsue_castle_chatbot/src/settings/settings_controller.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 import '../model/chat_message.dart';
