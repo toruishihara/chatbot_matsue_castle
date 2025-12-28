@@ -64,7 +64,12 @@ class ChatViewModel extends ChangeNotifier {
   }
 
   Future<void> handleMicButton() async {
+    if (_isRecording) {
+      stopRecording();
+      return;
+    }
     try {
+      _isRecording = true;
       await startRecording();
     } catch (e, st) {
       if (kDebugMode) {
@@ -122,7 +127,6 @@ class ChatViewModel extends ChangeNotifier {
 
     final file = await _recorder!.start(path);
     lastFile = file;
-    _isRecording = true;
     notifyListeners();
   }
 

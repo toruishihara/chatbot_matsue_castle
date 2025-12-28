@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:matsue_castle_chatbot/src/view/about_screen.dart';
+import 'package:matsue_castle_chatbot/src/view/about_view.dart';
+import 'package:matsue_castle_chatbot/src/view/shake_icon.dart';
 import 'package:provider/provider.dart';
 
 import '../model/chat_message.dart';
@@ -44,23 +45,11 @@ class _ChatItemListViewState extends State<ChatItemListView> {
             case 0: // About
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const AboutScreen()),
+                MaterialPageRoute(builder: (context) => const AboutView()),
               );
               break;
             case 1: // Help
               _showHelpDialog(context);
-              /*
-              showModalBottomSheet(
-                context: context,
-                showDragHandle: true,
-                builder: (_) => const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Text(
-                    'Help\n\n1) マイクで質問\n2) テキストで質問\n3) 左上の戻るで閉じる',
-                  ),
-                ),
-              );
-              */
               break;
             case 2: // Settings
               Navigator.restorablePushNamed(context, SettingsView.routeName);
@@ -108,15 +97,23 @@ class _ChatItemListViewState extends State<ChatItemListView> {
           padding: const EdgeInsets.all(8.0),
           child: TextField(
             decoration: InputDecoration(
-              labelText: 'Enter text',
+              labelText: 'Enter question text',
               border: const OutlineInputBorder(),
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.mic),
+              suffixIcon: ShakeIcon(
+                shake: chatViewModel.isRecording,
                 onPressed: () {
-                  if (kDebugMode) print("Mic pressed");
-                  context.read<ChatViewModel>().handleMicButton();
+                   if (kDebugMode) print("Mic pressed");
+                  chatViewModel.handleMicButton();
                 },
               ),
+
+              //suffixIcon: IconButton(
+              //  icon: const Icon(Icons.mic),
+              //  onPressed: () {
+              //    if (kDebugMode) print("Mic pressed");
+              //    context.read<ChatViewModel>().handleMicButton();
+              //  },
+              //),
             ),
             onSubmitted: (value) async {
               if (value.trim().isEmpty) return;
@@ -151,3 +148,4 @@ class _ChatItemListViewState extends State<ChatItemListView> {
     );
   }
 }
+

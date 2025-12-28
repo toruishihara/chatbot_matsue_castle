@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class AboutScreen extends StatelessWidget {
-  const AboutScreen({super.key});
+class AboutView extends StatelessWidget {
+  const AboutView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class AboutScreen extends StatelessWidget {
 
               // Application Name
               Text(
-                'Matue Castle Chatbot',
+                'Matsue Castle Chatbot',
                 style: Theme.of(context).textTheme.headlineMedium,
                 textAlign: TextAlign.center,
               ),
@@ -38,7 +38,7 @@ class AboutScreen extends StatelessWidget {
 
               // Application Legalese (Copyright)
               Text(
-                '© 2025 Toru Ishihara. All rights reserved.', // Replace with actual legalese
+                '本チャットボットは、学習・地域ボランティア活動を目的とした非営利利用です。著作権は各権利者に帰属します。',
                 style: Theme.of(context).textTheme.bodySmall,
                 textAlign: TextAlign.center,
               ),
@@ -48,6 +48,7 @@ class AboutScreen extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start, // Left align this section
                 children: <Widget>[
+                  const SizedBox(height: 8),
                   Text(
                     '参照文献:',
                     style: Theme.of(context).textTheme.titleSmall,
@@ -60,7 +61,7 @@ class AboutScreen extends StatelessWidget {
                   Text('・松江城築城に使われた石材の産地について 松江市ホームページ'),
                   Text('・松江城の石垣の石材とその起源（島根大学地球資源環境学研究報告, 2016）'),
                   Text('・城歩き編 国宝天守に行こう松江城 加藤理文（かとうまさふみ）先生'),
-                  Text('・Wikipedia 松江城、日本の城、その他関連項目'),
+                  Text('・Wikipedia 松江城、日本の城、その他関連項目'),                
                 ],
               ),              const SizedBox(height: 24),
             ],
