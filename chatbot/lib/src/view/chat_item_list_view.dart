@@ -20,6 +20,15 @@ class _ChatItemListViewState extends State<ChatItemListView> {
   int _selectedIndex = 0; // for the bottom bar
 
   @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ScaffoldMessenger.of(context).showSnackBar(buildSnackBar());
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     Provider.of<ChatViewModel>(context); // keep for rebuilds if you want
 
@@ -57,12 +66,46 @@ class _ChatItemListViewState extends State<ChatItemListView> {
           }
         },
         destinations: const [
-          NavigationDestination(
-              icon: Icon(Icons.info_outline), label: 'About'),
-          NavigationDestination(
-              icon: Icon(Icons.help_outline), label: 'Help'),
+          NavigationDestination(icon: Icon(Icons.info_outline), label: 'About'),
+          NavigationDestination(icon: Icon(Icons.help_outline), label: 'Help'),
           NavigationDestination(icon: Icon(Icons.settings), label: 'Settings'),
         ],
+      ),
+    );
+  }
+
+  SnackBar buildSnackBar() {
+    return SnackBar(
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      margin: const EdgeInsets.fromLTRB(16, 0, 8, 60),
+      content: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 8,
+              offset: Offset(2, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: const [
+            Spacer(), // pushes text to the right
+            Text(
+              'マイクを押して日本語や、\n英語で話してください ↘︎',
+              style: TextStyle(
+                color: Colors.black87,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -81,12 +124,14 @@ class _ChatItemListViewState extends State<ChatItemListView> {
                 alignment:
                     isUser ? Alignment.centerRight : Alignment.centerLeft,
                 child: Column(
-                  crossAxisAlignment:
-                      isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                  crossAxisAlignment: isUser
+                      ? CrossAxisAlignment.end
+                      : CrossAxisAlignment.start,
                   children: [
                     Text(msg.text),
                     Text(isUser ? 'User' : 'Assistant',
-                        style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                        style:
+                            const TextStyle(fontSize: 12, color: Colors.grey)),
                   ],
                 ),
               );
@@ -102,18 +147,10 @@ class _ChatItemListViewState extends State<ChatItemListView> {
               suffixIcon: ShakeIcon(
                 shake: chatViewModel.isRecording,
                 onPressed: () {
-                   if (kDebugMode) print("Mic pressed");
+                  if (kDebugMode) print("Mic pressed");
                   chatViewModel.handleMicButton();
                 },
               ),
-
-              //suffixIcon: IconButton(
-              //  icon: const Icon(Icons.mic),
-              //  onPressed: () {
-              //    if (kDebugMode) print("Mic pressed");
-              //    context.read<ChatViewModel>().handleMicButton();
-              //  },
-              //),
             ),
             onSubmitted: (value) async {
               if (value.trim().isEmpty) return;
@@ -125,18 +162,16 @@ class _ChatItemListViewState extends State<ChatItemListView> {
     );
   }
 
-    /// Show Help dialog
+  /// Show Help dialog
   void _showHelpDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Help & Tips'),
-          content: const Text(
-            '🗣️ You can talk or type to the bot about Matsue Castle.\n\n'
-            '🎙️ Tap the microphone to ask by voice.\n\n'
-            '⚙️ You can change settings in the top-right menu.',
-          ),
+          content: const Text('🎙️ Tap the microphone to ask by voice.\n\n'
+              'You can talk in English or Japanese\n\n'
+              'マイクボタンを押してから、日本語や英語で質問を話してください\n\n'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -148,4 +183,3 @@ class _ChatItemListViewState extends State<ChatItemListView> {
     );
   }
 }
-
