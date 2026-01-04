@@ -46,6 +46,6 @@ flutter:
 flutter_icons:
   android: true
   ios: true
-  image_path: "assets/icon/matsue_castle_nobg.png"
-  adaptive_icon_foreground: "assets/icon/matsue_castle_nobg.png"
-  adaptive_icon_background: "#00000000"
+  image_path: "assets/icon/castle_icon_bg.png"
+  adaptive_icon_foreground: "assets/icon/castle_icon_bg.png"
+  adaptive_icon_background: "#FFFFFF"

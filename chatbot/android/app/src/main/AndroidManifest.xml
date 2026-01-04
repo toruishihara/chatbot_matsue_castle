@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="matsue_castle_chatbot"
+        android:label="松江城bot"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
